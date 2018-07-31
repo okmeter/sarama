@@ -65,6 +65,10 @@ type Config struct {
 		// network being dialed.
 		// If nil, a local address is automatically chosen.
 		LocalAddr net.Addr
+
+		// Dial is the dial function for creating unencrypted TCP connections.
+		// If Dial is nil, then net.Dial is used.
+		Dial func(network, addr string) (net.Conn, error)
 	}
 
 	// Metadata is the namespace for metadata management properties used by the

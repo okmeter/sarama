@@ -92,7 +92,11 @@ func (b *Broker) Open(conf *Config) error {
 		if conf.Net.TLS.Enable {
 			b.conn, b.connErr = tls.DialWithDialer(&dialer, "tcp", b.addr, conf.Net.TLS.Config)
 		} else {
-			b.conn, b.connErr = dialer.Dial("tcp", b.addr)
+			if conf.Net.Dial != nil {
+				b.conn, b.connErr = conf.Net.Dial("tcp", b.addr)
+			} else {
+				b.conn, b.connErr = dialer.Dial("tcp", b.addr)
+			}
 		}
 		if b.connErr != nil {
 			Logger.Printf("Failed to connect to broker %s: %s\n", b.addr, b.connErr)
