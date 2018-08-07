@@ -1,6 +1,8 @@
 package sarama
 
 type DescribeGroupsResponse struct {
+	Version int16
+	ThrottleTimeMs int32
 	Groups []*GroupDescription
 }
 
@@ -19,6 +21,13 @@ func (r *DescribeGroupsResponse) encode(pe packetEncoder) error {
 }
 
 func (r *DescribeGroupsResponse) decode(pd packetDecoder, version int16) (err error) {
+	r.Version = version
+	if version >= 1 {
+		r.ThrottleTimeMs, err = pd.getInt32()
+		if err != nil {
+			return err
+		}
+	}
 	n, err := pd.getArrayLength()
 	if err != nil {
 		return err

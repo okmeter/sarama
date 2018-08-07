@@ -10,7 +10,7 @@ var (
 		0, 0, 0, 0, // no groups
 	}
 
-	describeGroupsResponsePopulated = []byte{
+	describeGroupsResponsePopulatedV0 = []byte{
 		0, 0, 0, 2, // 2 groups
 
 		0, 0, // no error
@@ -32,6 +32,31 @@ var (
 		0, 0,
 		0, 0, 0, 0,
 	}
+
+	describeGroupsResponsePopulatedV1 = []byte{
+		0, 0, 0, 0, // THROTTLE_TIME_MS
+		0, 0, 0, 2, // 2 groups
+
+		0, 0, // no error
+		0, 3, 'f', 'o', 'o', // Group ID
+		0, 3, 'b', 'a', 'r', // State
+		0, 8, 'c', 'o', 'n', 's', 'u', 'm', 'e', 'r', // ConsumerProtocol type
+		0, 3, 'b', 'a', 'z', // Protocol name
+		0, 0, 0, 1, // 1 member
+		0, 2, 'i', 'd', // Member ID
+		0, 6, 's', 'a', 'r', 'a', 'm', 'a', // Client ID
+		0, 9, 'l', 'o', 'c', 'a', 'l', 'h', 'o', 's', 't', // Client Host
+		0, 0, 0, 3, 0x01, 0x02, 0x03, // MemberMetadata
+		0, 0, 0, 3, 0x04, 0x05, 0x06, // MemberAssignment
+
+		0, 30, // ErrGroupAuthorizationFailed
+		0, 0,
+		0, 0,
+		0, 0,
+		0, 0,
+		0, 0, 0, 0,
+	}
+
 )
 
 func TestDescribeGroupsResponse(t *testing.T) {
@@ -44,7 +69,7 @@ func TestDescribeGroupsResponse(t *testing.T) {
 	}
 
 	response = new(DescribeGroupsResponse)
-	testVersionDecodable(t, "populated", response, describeGroupsResponsePopulated, 0)
+	testVersionDecodable(t, "populated", response, describeGroupsResponsePopulatedV0, 0)
 	if len(response.Groups) != 2 {
 		t.Error("Expected two groups")
 	}
@@ -87,5 +112,11 @@ func TestDescribeGroupsResponse(t *testing.T) {
 	}
 	if len(group1.Members) != 0 {
 		t.Error("Unxpected groups[1].Members, found", group0.Members)
+	}
+
+	responseV1 := new(DescribeGroupsResponse)
+	testVersionDecodable(t, "populated", responseV1, describeGroupsResponsePopulatedV1, 1)
+	if !reflect.DeepEqual(response.Groups, responseV1.Groups) {
+		t.Error("V1 and V0 payload should be equal")
 	}
 }
